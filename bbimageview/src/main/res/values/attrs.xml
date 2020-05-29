@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BbImageView">
+        <!-- Whether to show a blurred background -->
+        <attr name="show_blurred_background" format="boolean" />
+        <!-- Blur radius to use -->
+        <attr name="blur_radius" format="float" />
+    </declare-styleable>c
+    <declare-styleable name="BbImageViewSwitcher" parent="BbImageView">
+        <!-- Image source drawable-->
+        <attr name="src" format="reference" />
+        <!-- Whether to show a blurred background -->
+        <attr name="show_blurred_background" />
+        <!-- Blur radius to use -->
+        <attr name="blur_radius" />
+    </declare-styleable>
+</resources>
