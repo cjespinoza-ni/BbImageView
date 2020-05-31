@@ -31,7 +31,7 @@ import android.widget.ViewSwitcher
  * @attr ref [R.styleable.BbImageViewSwitcher_show_blurred_background]
  * @attr ref [R.styleable.BbImageViewSwitcher_blur_radius]
  */
-class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : ViewSwitcher(context, attrs) {
+open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : ViewSwitcher(context, attrs) {
     constructor(context: Context, attrs: AttributeSet?) : this(context,attrs, 0)
     constructor(context: Context) : this(context,null, 0)
 

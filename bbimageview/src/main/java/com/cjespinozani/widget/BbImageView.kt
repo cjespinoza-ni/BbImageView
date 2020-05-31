@@ -36,7 +36,7 @@ import com.cjespinozani.widget.extensions.drawable.createScaledBitmapCopy
  * @attr ref [R.styleable.BbImageView_show_blurred_background]
  * @attr ref [R.styleable.BbImageView_blur_radius]
  */
-class BbImageView @JvmOverloads constructor(
+open class BbImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ImageView(context, attrs, defStyleAttr) {
 
@@ -101,9 +101,10 @@ class BbImageView @JvmOverloads constructor(
      * overrides [ImageView.setImageDrawable] to create the blurred drawable representation if configured
      */
     override fun setImageDrawable(drawable: Drawable?) {
-        if(this.drawable != drawable)
-            createBlurredBackground(drawable)
+        val oldDrawable: Drawable? = this.drawable
         super.setImageDrawable(drawable)
+        if(drawable != oldDrawable)
+            createBlurredBackground(drawable)
     }
 
 
@@ -164,7 +165,7 @@ class BbImageView @JvmOverloads constructor(
             return
         }
 
-        if (!shouldCreateBlurredBitmap() || drawable == null) {
+        if (drawable == null || !shouldCreateBlurredBitmap()) {
             blurredBitmap = null
             return
         }
@@ -178,7 +179,7 @@ class BbImageView @JvmOverloads constructor(
      * Creates an blurred BitmapDrawable representation of this view's drawable
      */
     private fun createBlurredBackground(bitmap: Bitmap?) {
-        if (!shouldCreateBlurredBitmap() || bitmap == null) {
+        if (bitmap == null || !shouldCreateBlurredBitmap()) {
             blurredBitmap = null
             return
         }
@@ -193,7 +194,7 @@ class BbImageView @JvmOverloads constructor(
      * @return whether to create the blurred background or not
      */
     private fun shouldCreateBlurredBitmap(): Boolean {
-        if(!mShowBlurredBackground){
+        if(drawable == null || !mShowBlurredBackground){
             return false
         }
         when(scaleType) {
