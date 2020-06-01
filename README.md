@@ -3,6 +3,17 @@
 
 ![logo](assets/logo.png)
 
+
+## Download
+You can download an aar file from GitHub's [releases page][1].
+
+Or use Gradle:
+```gradle
+dependencies {
+  implementation 'com.cjespinozani:bbimageview:1.0.1'
+}
+```
+
 ## How do I use BbImageView?
 The same way you use an `ImageView`. Place the view in your XML layout file.
 ```xml
@@ -114,3 +125,5 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+[1]: https://github.com/cjespinoza-ni/BbImageView/releases
