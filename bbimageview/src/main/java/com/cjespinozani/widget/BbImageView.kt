@@ -24,6 +24,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.ImageView
 import com.cjespinozani.widget.extensions.bitmap.applyBlur
 import com.cjespinozani.widget.extensions.bitmap.createScaledCopy
@@ -35,16 +36,20 @@ import com.cjespinozani.widget.extensions.drawable.createScaledBitmapCopy
  *
  * @attr ref [R.styleable.BbImageView_show_blurred_background]
  * @attr ref [R.styleable.BbImageView_blur_radius]
+ * @attr ref [R.styleable.BbImageView_hide_main_image]
  */
 open class BbImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ImageView(context, attrs, defStyleAttr) {
 
+    private val LOG_TAG = "BbImageView"
+
     private var mShowBlurredBackground: Boolean
     private var mBlurRadius: Float
+    private var mHideMainImage: Boolean
 
     /**
-     * blurredDrawable representation of this view's drawable
+     * blurred bitmap representation of this view's drawable
      */
     private var blurredBitmap: Bitmap? = null
 
@@ -59,9 +64,26 @@ open class BbImageView @JvmOverloads constructor(
          * @param value whether this view will show a blurred background.
          */
         set(value) {
-            if(value != mShowBlurredBackground) {
+            if (value != mShowBlurredBackground) {
                 mShowBlurredBackground = value
                 createBlurredBackground(drawable)
+                invalidate()
+            }
+        }
+
+    var hideMainImage: Boolean
+        /**
+         * Return whether this view hides the main image.
+         * @return whether this view hides the main image.
+         */
+        get() = mHideMainImage
+        /**
+         * Sets whether this view should hide the main image.
+         * @param value whether this view should hide the main image.
+         */
+        set(value) {
+            if (value != mHideMainImage) {
+                mHideMainImage = value
                 invalidate()
             }
         }
@@ -78,8 +100,8 @@ open class BbImageView @JvmOverloads constructor(
          * @param value The radius of the blur
          */
         set(value) {
-            if(value <= 0 || value > 25) return
-            if(value != mBlurRadius) {
+            if (value <= 0 || value > 25) return
+            if (value != mBlurRadius) {
                 mBlurRadius = value
                 createBlurredBackground(drawable)
                 invalidate()
@@ -91,8 +113,13 @@ open class BbImageView @JvmOverloads constructor(
             attrs, R.styleable.BbImageView, defStyleAttr, 0
         )
 
-        mShowBlurredBackground = a.getBoolean(R.styleable.BbImageView_show_blurred_background, DEFAULT_SHOW_BLURRED_BACKGROUND)
+        mShowBlurredBackground = a.getBoolean(
+            R.styleable.BbImageView_show_blurred_background,
+            DEFAULT_SHOW_BLURRED_BACKGROUND
+        )
         mBlurRadius = a.getFloat(R.styleable.BbImageView_blur_radius, DEFAULT_BLUR_RADIUS)
+        mHideMainImage =
+            a.getBoolean(R.styleable.BbImageView_hide_main_image, DEFAULT_HIDE_MAIN_IMAGE)
 
         a.recycle()
     }
@@ -103,7 +130,7 @@ open class BbImageView @JvmOverloads constructor(
     override fun setImageDrawable(drawable: Drawable?) {
         val oldDrawable: Drawable? = this.drawable
         super.setImageDrawable(drawable)
-        if(drawable != oldDrawable)
+        if (drawable != oldDrawable)
             createBlurredBackground(drawable)
     }
 
@@ -129,12 +156,22 @@ open class BbImageView @JvmOverloads constructor(
      * overrides [ImageView.onDraw] to draw a blurred background if configured
      */
     override fun onDraw(canvas: Canvas?) {
-        if(mShowBlurredBackground && drawable != null && blurredBitmap == null)
-            createBlurredBackground(drawable)
-        if (mShowBlurredBackground && canvas != null && blurredBitmap != null) {
-            drawBlurredBackground(canvas, blurredBitmap!!)
+        try {
+            if (mShowBlurredBackground && drawable != null && blurredBitmap == null)
+                createBlurredBackground(drawable)
+            if (mShowBlurredBackground && canvas != null && blurredBitmap != null) {
+                drawBlurredBackground(canvas, blurredBitmap!!)
+            }
+
+            // if mHideMainImage is true then there's nothing to draw
+            if (mHideMainImage)
+                return
+
+            super.onDraw(canvas)
+
+        } catch (e: Exception) {
+            Log.w(LOG_TAG, "Unable to create the blurred background")
         }
-        super.onDraw(canvas)
     }
 
     /**
@@ -152,7 +189,12 @@ open class BbImageView @JvmOverloads constructor(
         val horizontalOffset = (this.width - width) / 2
         val verticalOffset = (this.height - height) / 2
 
-        val rect = Rect(horizontalOffset, verticalOffset, width + horizontalOffset, height + verticalOffset)
+        val rect = Rect(
+            horizontalOffset,
+            verticalOffset,
+            width + horizontalOffset,
+            height + verticalOffset
+        )
         canvas.drawBitmap(blurredBitmap, null, rect, null)
     }
 
@@ -160,7 +202,7 @@ open class BbImageView @JvmOverloads constructor(
      * Creates an blurred BitmapDrawable representation of this view's drawable
      */
     private fun createBlurredBackground(drawable: Drawable?) {
-        if(drawable is BitmapDrawable) {
+        if (drawable is BitmapDrawable) {
             createBlurredBackground(drawable.bitmap)
             return
         }
@@ -170,9 +212,10 @@ open class BbImageView @JvmOverloads constructor(
             return
         }
 
-        //RenderScript blur effect will fail if it's in edit mode
+        // RenderScript blur effect will fail if it's in edit mode
         if (!isInEditMode)
-            blurredBitmap = drawable.createScaledBitmapCopy(maxLength = 300).applyBlur(context, mBlurRadius)
+            blurredBitmap =
+                drawable.createScaledBitmapCopy(maxLength = 300).applyBlur(context, mBlurRadius)
     }
 
     /**
@@ -184,7 +227,7 @@ open class BbImageView @JvmOverloads constructor(
             return
         }
 
-        //RenderScript blur effect will fail if it's in edit mode
+        // RenderScript blur effect will fail if it's in edit mode
         if (!isInEditMode)
             blurredBitmap = bitmap.createScaledCopy(maxLength = 300).applyBlur(context, mBlurRadius)
     }
@@ -194,10 +237,14 @@ open class BbImageView @JvmOverloads constructor(
      * @return whether to create the blurred background or not
      */
     private fun shouldCreateBlurredBitmap(): Boolean {
-        if(drawable == null || !mShowBlurredBackground){
+        if (drawable == null || !mShowBlurredBackground) {
             return false
         }
-        when(scaleType) {
+        // if the main image is hidden then it should create the blurred background
+        if(hideMainImage) {
+            return true
+        }
+        when (scaleType) {
             // if ScaleType is CENTER_CROP or FIT_XY
             // the image will fill the entire view
             // so there's no need to create the blurred background
@@ -212,15 +259,17 @@ open class BbImageView @JvmOverloads constructor(
             ScaleType.FIT_END,
             ScaleType.FIT_START -> {
                 val viewRatio = width.toDouble() / height.toDouble()
-                val drawableRatio = drawable.intrinsicWidth.toDouble() / drawable.intrinsicHeight.toDouble()
+                val drawableRatio =
+                    drawable.intrinsicWidth.toDouble() / drawable.intrinsicHeight.toDouble()
                 return Math.abs(viewRatio - drawableRatio) > 0.001
             }
             else -> {
                 // if the image is smaller than the view
                 // the image will fill the entire view area only if it's aspect ratio is the same as the view's aspect ratio
-                if(drawable.intrinsicWidth > width || drawable.intrinsicHeight > height){
+                if (drawable.intrinsicWidth > width || drawable.intrinsicHeight > height) {
                     val viewRatio = width.toDouble() / height.toDouble()
-                    val drawableRatio = drawable.intrinsicWidth.toDouble() / drawable.intrinsicHeight.toDouble()
+                    val drawableRatio =
+                        drawable.intrinsicWidth.toDouble() / drawable.intrinsicHeight.toDouble()
                     return Math.abs(viewRatio - drawableRatio) > 0.001
                 }
                 return true

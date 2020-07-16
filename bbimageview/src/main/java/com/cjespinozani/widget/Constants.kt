@@ -36,3 +36,8 @@ const val DEFAULT_SHOW_BLURRED_BACKGROUND: Boolean = true
  */
 const val DEFAULT_BLUR_RADIUS: Float = 12f
 
+/**
+ * Returns the default value for showBlurredBackground.
+ */
+const val DEFAULT_HIDE_MAIN_IMAGE: Boolean = false
+

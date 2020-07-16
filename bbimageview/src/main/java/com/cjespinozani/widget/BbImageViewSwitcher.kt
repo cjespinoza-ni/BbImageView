@@ -30,13 +30,16 @@ import android.widget.ViewSwitcher
  * @attr ref [R.styleable.BbImageViewSwitcher_src]
  * @attr ref [R.styleable.BbImageViewSwitcher_show_blurred_background]
  * @attr ref [R.styleable.BbImageViewSwitcher_blur_radius]
+ * @attr ref [R.styleable.BbImageViewSwitcher_hide_main_image]
  */
-open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : ViewSwitcher(context, attrs) {
-    constructor(context: Context, attrs: AttributeSet?) : this(context,attrs, 0)
-    constructor(context: Context) : this(context,null, 0)
+open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
+    ViewSwitcher(context, attrs) {
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(context: Context) : this(context, null, 0)
 
     private var mShowBlurredBackground: Boolean
     private var mBlurRadius: Float
+    private var mHideMainImage: Boolean
 
     var showBlurredBackground: Boolean
         /**
@@ -49,13 +52,13 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
          * @param value whether to show a blurred background.
          */
         set(value) {
-            if(value != mShowBlurredBackground) {
+            if (value != mShowBlurredBackground) {
                 mShowBlurredBackground = value
                 handleShowBlurRadiusChanged()
             }
         }
 
-    var blurRadius:Float
+    var blurRadius: Float
         /**
          * Gets the radius to use when blurring the background.
          * @return the radius used to blur the background drawable.
@@ -67,10 +70,27 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
          * @param value The radius of the blur
          */
         set(value) {
-            if(value <= 0 || value > 25) return
-            if(value != mBlurRadius) {
-                mBlurRadius=value
+            if (value <= 0 || value > 25) return
+            if (value != mBlurRadius) {
+                mBlurRadius = value
                 handleBlurRadiusChanged()
+            }
+        }
+
+    var hideMainImage: Boolean
+        /**
+         * Return whether to hide the main image.
+         * @return whether to hide the main image.
+         */
+        get() = mHideMainImage
+        /**
+         * Sets whether to hide the main image.
+         * @param value whether to hide the main image.
+         */
+        set(value) {
+            if (value != mHideMainImage) {
+                mHideMainImage = value
+                handleHideMainImageChanged()
             }
         }
 
@@ -86,10 +106,15 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
             attrs, R.styleable.BbImageViewSwitcher, defStyleAttr, 0
         )
 
-        mShowBlurredBackground = a.getBoolean(R.styleable.BbImageViewSwitcher_show_blurred_background, DEFAULT_SHOW_BLURRED_BACKGROUND)
+        mShowBlurredBackground = a.getBoolean(
+            R.styleable.BbImageViewSwitcher_show_blurred_background,
+            DEFAULT_SHOW_BLURRED_BACKGROUND
+        )
         mBlurRadius = a.getFloat(R.styleable.BbImageViewSwitcher_blur_radius, DEFAULT_BLUR_RADIUS)
+        mHideMainImage =
+            a.getBoolean(R.styleable.BbImageViewSwitcher_hide_main_image, DEFAULT_HIDE_MAIN_IMAGE)
 
-        if(a.hasValue(R.styleable.BbImageViewSwitcher_src)){
+        if (a.hasValue(R.styleable.BbImageViewSwitcher_src)) {
             a.getDrawable(R.styleable.BbImageViewSwitcher_src)?.also {
                 setImageDrawable(it)
             }
@@ -100,6 +125,7 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
         //update children values
         handleShowBlurRadiusChanged()
         handleBlurRadiusChanged()
+        handleHideMainImageChanged()
     }
 
     /**
@@ -108,7 +134,7 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
      */
     fun setImageDrawable(drawable: Drawable?) {
         nextView.also {
-            if(it is BbImageView)
+            if (it is BbImageView)
                 it.setImageDrawable(drawable)
             showNext()
         }
@@ -120,7 +146,7 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
      */
     fun setImageBitmap(bitmap: Bitmap?) {
         nextView.also {
-            if(it is BbImageView)
+            if (it is BbImageView)
                 it.setImageBitmap(bitmap)
             showNext()
         }
@@ -132,7 +158,7 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
      */
     fun setImageSrc(resId: Int) {
         nextView.also {
-            if(it is BbImageView)
+            if (it is BbImageView)
                 it.setImageResource(resId)
             showNext()
         }
@@ -145,7 +171,7 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
      */
     fun setImageURI(uri: Uri?) {
         nextView.also {
-            if(it is BbImageView)
+            if (it is BbImageView)
                 it.setImageURI(uri)
             showNext()
         }
@@ -155,9 +181,9 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
      * Updates children's [BbImageView.showBlurredBackground]
      */
     private fun handleShowBlurRadiusChanged() {
-        for(i in 0 until childCount) {
+        for (i in 0 until childCount) {
             getChildAt(i)?.also {
-                if(it is BbImageView)
+                if (it is BbImageView)
                     it.showBlurredBackground = mShowBlurredBackground
             }
         }
@@ -167,10 +193,22 @@ open class BbImageViewSwitcher(context: Context, attrs: AttributeSet?, defStyleA
      * Updates children's [BbImageView.blurRadius]
      */
     private fun handleBlurRadiusChanged() {
-        for(i in 0 until childCount) {
+        for (i in 0 until childCount) {
             getChildAt(i)?.also {
-                if(it is BbImageView)
+                if (it is BbImageView)
                     it.blurRadius = mBlurRadius
+            }
+        }
+    }
+
+    /**
+     * Updates children's [BbImageView.hideMainImage]
+     */
+    private fun handleHideMainImageChanged() {
+        for (i in 0 until childCount) {
+            getChildAt(i)?.also {
+                if (it is BbImageView)
+                    it.hideMainImage = mHideMainImage
             }
         }
     }
