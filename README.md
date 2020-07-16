@@ -10,7 +10,7 @@ You can download an aar file from GitHub's [releases page][1].
 Or use Gradle:
 ```gradle
 dependencies {
-  implementation 'com.cjespinozani:bbimageview:1.0.1'
+  implementation 'com.cjespinozani:bbimageview:1.1.0'
 }
 ```
 
@@ -35,13 +35,15 @@ Then you can reference it in code
 Aditional attributes can be set in code.
 ```kotlin
   view.showBlurredBackground = true   //showBlurredBackground: Boolean. Whether to show a blurred background.
+  view.hideMainImage = false          //hideMainImage: Boolean. Whether to hide the main image.
   view.blurRadius = 12f               //blurRadius: Float. Blur radius to apply, must be > 0 <= 25
 ```
 
 As well as in the layout file.
 ```xml
-  app:showBlurredBackground="true"    
-  app:blurRadius="12"                 
+  app:showBlurredBackground="true"
+  app:hideMainImage="false"
+  app:blurRadius="12"
 ```
 
 
@@ -91,12 +93,14 @@ and change it's drawable when necessary
 Aditional attributes can be set in code.
 ```kotlin
   imageViewSwitcher.showBlurredBackground = true   //showBlurredBackground: Boolean. Whether to show a blurred background.
+  imageViewSwitcher.hideMainImage = false          //hideMainImage: Boolean. Whether to hide the main image.
   imageViewSwitcher.blurRadius = 12f               //blurRadius: Float. Blur radius to apply, must be > 0 <= 25
 ```
 
 As well as in the layout file.
 ```xml
-  app:showBlurredBackground="true"    
+  app:showBlurredBackground="true"
+  app:hideMainImage="false"
   app:blurRadius="12"                 
 ```
 
